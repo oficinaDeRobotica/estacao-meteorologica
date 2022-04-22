@@ -1,21 +1,16 @@
 #include <Arduino.h>
-#include <SPI.h>
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
 #include <SPIFFS.h>
 #include "DHT.h"
-#include <Wire.h>
-#include <Adafruit_BMP085.h>
 
 #define DHTTYPE DHT22
-#define rainDigital 19
+#define rainDigital 18
 
-const char* ssid = "wifi";
-const char* password = "12341234";
-float temperature, humidity, pressure, altitude;
+const char* ssid = "Wi-fi 2G";
+const char* password = "05082003";
+float temperature, humidity;
 uint8_t DHTPin = 2; 
-Adafruit_BMP085 bmp;
-
 
 DHT dht(DHTPin, DHTTYPE); 
 
@@ -41,26 +36,6 @@ String readdhtTemperature() {
   }
 }
 
-String readBmpPressure() {
-  pressure = bmp.readPressure();
-  if (round(pressure)){
-    return String(round(pressure));
-  }
-  else{
-    return String("00");
-  }
-}
-
-String readBmpAltitude() {
-  altitude = bmp.readAltitude(102000);
-    if (round(altitude)){
-    return String(round(altitude));
-  }
-  else{
-    return String("00");
-  }
-}
-
 String readraindigital() {
     return String(digitalRead(rainDigital));  
 }
@@ -73,11 +48,6 @@ void setup(){
   pinMode(DHTPin, INPUT);
 
   dht.begin();  
-
-  if (!bmp.begin()) {
-    Serial.println("Não foi possivel achar um sensor BMP085/BMP180, checar conexões!");
-    while (1) {}
-  }
 
   if(!SPIFFS.begin()){
     Serial.println("Não foi possível montar o SPIFFS");
@@ -103,39 +73,34 @@ void setup(){
   server.on("/logo", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(SPIFFS, "/logo.png", "image/png");
   });
-  server.on("/temperature", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send_P(200, "text/plain", readdhtTemperature().c_str());
+  server.on("/favico", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(SPIFFS, "/favico.ico", "image/png");
   });
-  server.on("/humidity", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send_P(200, "text/plain", readdhtHumidity().c_str());
-  });
-  server.on("/chuva", HTTP_GET, [](AsyncWebServerRequest *request){
-  request->send_P(200, "text/plain", readraindigital().c_str());
-  });
-  server.on("/pressure", HTTP_GET, [](AsyncWebServerRequest *request){
-     request->send_P(200, "text/plain", readBmpPressure().c_str());
-   });
-   server.on("/altitude", HTTP_GET, [](AsyncWebServerRequest *request){
-     request->send_P(200, "text/plain", readBmpAltitude().c_str());
-   });
-  // server.on("/pressure_sea", HTTP_GET, [](AsyncWebServerRequest *request){
-  // request->send_P(200, "text/plain", readBmpSeaLevelPressure().c_str());
+
+  //  server.on("/temperature", HTTP_GET, [](AsyncWebServerRequest *request){
+  //    request->send_P(200, "text/plain", readdhtTemperature().c_str());
+  //  });
+  //  server.on("/humidity", HTTP_GET, [](AsyncWebServerRequest *request){
+  //    request->send_P(200, "text/plain", readdhtHumidity().c_str());
+  //  });
+  //  server.on("/chuva", HTTP_GET, [](AsyncWebServerRequest *request){
+  //  request->send_P(200, "text/plain", readraindigital().c_str());
   // });
 
-  // server.on("/temperature", HTTP_GET, [](AsyncWebServerRequest *request){
-  //   request->send_P(200, "text/plain", "30");
-  // });
-  // server.on("/humidity", HTTP_GET, [](AsyncWebServerRequest *request){
-  //   request->send_P(200, "text/plain",  "30");
-  // });
-  // server.on("/chuva", HTTP_GET, [](AsyncWebServerRequest *request){
-  //   request->send_P(200, "text/plain", "30");
-  // });
+  server.on("/temperature", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send_P(200, "text/plain", "30");
+  });
+  server.on("/humidity", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send_P(200, "text/plain",  "30");
+  });
+  server.on("/chuva", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send_P(200, "text/plain", "30");
+  });
 
   // Start server
   server.begin();
 }
  
 void loop(){
-
+  
 }

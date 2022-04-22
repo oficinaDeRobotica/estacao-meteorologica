@@ -52,13 +52,7 @@ copies or substantial portions of the Software. -->
       margin-bottom: 50px;
     }
     #chart-chuva{
-      margin-bottom:50px;
-    }
-    #chart-pressure{
-      margin-bottom:50px;
-    }
-    #chart-altitude{
-      margin-bottom:50px;
+
     }
   </style>
 </head>
@@ -77,8 +71,7 @@ copies or substantial portions of the Software. -->
   <div id="chart-temperature" class="container"></div>
   <div id="chart-humidity" class="container"></div>
   <div id="chart-chuva" class="container"></div>
-  <div id="chart-pressure" class="container"></div>
-  <div id="chart-altitude" class="container"></div>
+  <!-- <div id="chart-pressure" class="container"></div> -->
 </body>
 
 <script>
@@ -227,7 +220,7 @@ setInterval(function ( ) {
   };
   xhttp.open("GET", "/temperature", true);
   xhttp.send();
-}, 1000 ) ;
+}, 5000 ) ;
 
 var chartH = new Highcharts.Chart({
   chart:{ renderTo:'chart-humidity' }, 
@@ -266,7 +259,7 @@ setInterval(function ( ) {
   };
   xhttp.open("GET", "/humidity", true);
   xhttp.send();
-}, 1000 ) ;
+}, 5000 ) ;
 
 
 var chartP = new Highcharts.Chart({
@@ -307,87 +300,7 @@ setInterval(function ( ) {
   };
   xhttp.open("GET", "/chuva", true);
   xhttp.send();
-}, 1000 ) ;
-
-var chartA = new Highcharts.Chart({
-  chart:{ renderTo:'chart-pressure' },
-  title: { text: 'Pressão' },
-  series: [{
-    showInLegend: false,
-    data: []
-  }],
-  plotOptions: {
-    line: { animation: false,
-      dataLabels: { enabled: true, color: '#e6e6e6' },
-    },
-    series: { color: '#b35be3' }
-  },
-  xAxis: {
-    type: 'datetime',
-    dateTimeLabelFormats: { second: '%H:%M:%S' }
-  },
-  yAxis: {
-    title: { text: 'Pressão (Pa)' }
-  },
-  credits: { enabled: false }
-});
-setInterval(function ( ) {
-  var xhttp = new XMLHttpRequest();
-  xhttp.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-      var x = (new Date()).getTime(),
-          y = parseFloat(this.responseText);
-      //console.log(this.responseText);
-      if(chartA.series[0].data.length > 40) {
-        chartA.series[0].addPoint([x, y], true, true, true);
-      } else {
-        chartA.series[0].addPoint([x, y], true, false, true);
-      }
-    }
-  };
-  xhttp.open("GET", "/pressure", true);
-  xhttp.send();
-}, 1000 ) ;
-
-var chartB = new Highcharts.Chart({
-  chart:{ renderTo:'chart-altitude' },
-  title: { text: 'Altitude' },
-  series: [{
-    showInLegend: false,
-    data: []
-  }],
-  plotOptions: {
-    line: { animation: false,
-      dataLabels: { enabled: true, color: '#e6e6e6' },
-    },
-    series: { color: '#b35be3' }
-  },
-  xAxis: {
-    type: 'datetime',
-    dateTimeLabelFormats: { second: '%H:%M:%S' }
-  },
-  yAxis: {
-    title: { text: 'Altitude (Metros)' }
-  },
-  credits: { enabled: false }
-});
-setInterval(function ( ) {
-  var xhttp = new XMLHttpRequest();
-  xhttp.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-      var x = (new Date()).getTime(),
-          y = parseFloat(this.responseText);
-      //console.log(this.responseText);
-      if(chartB.series[0].data.length > 40) {
-        chartB.series[0].addPoint([x, y], true, true, true);
-      } else {
-        chartB.series[0].addPoint([x, y], true, false, true);
-      }
-    }
-  };
-  xhttp.open("GET", "/altitude", true);
-  xhttp.send();
-}, 1000 ) ;
+}, 5000 ) ;
 
 </script>
 </html>
