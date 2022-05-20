@@ -1,0 +1,3 @@
+[submodule "external_site/oficina-heroku"]
+	path = external_site/oficina-heroku
+	url = git@github.com:cauafroes/oficina-heroku.git
