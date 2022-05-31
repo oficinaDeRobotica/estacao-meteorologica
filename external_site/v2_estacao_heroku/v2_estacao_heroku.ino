@@ -17,8 +17,8 @@
   #include <ESP8266WiFi.h>
   #include <ESP8266HTTPClient.h>
   #include <WiFiClient.h>
-  #define buttonPin 12
-  #define inPluv 14
+  #define buttonPin 12 //D6
+  #define inPluv 14   //D5
 #endif
 
 Adafruit_BME280 bme;  // I2C
