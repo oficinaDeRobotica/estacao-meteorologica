@@ -1,4 +1,4 @@
-/*
+/* outras opcoes de conexao do bme
 #include <SPI.h>
 #define BME_SCK 18
 #define BME_MISO 19
@@ -6,7 +6,7 @@
 #define BME_CS 5
 */
 
-//pro upload via wifi
+//upload via wifi
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
 
@@ -18,8 +18,8 @@
 
 //wifi pra requisição e pro upload via wifi
 #ifndef STASSID
-#define STASSID "apezin"
-#define STAPSK  "05082003"
+#define STASSID "wifi"
+#define STAPSK  "12341234"
 #endif
 const char* ssid = STASSID;
 const char* password = STAPSK;
@@ -46,7 +46,7 @@ Adafruit_BME280 bme(BME_CS);  // hardware SPI
 Adafruit_BME280 bme(BME_CS, BME_MOSI, BME_MISO, BME_SCK);  // software SPI
 
 */
-const char* serverName = "http://estacao-db.herokuapp.com/xxxpost-data.php";
+const char* serverName = "http://estacao-db.herokuapp.com/post-data.php";
 
 String apiKeyValue = "tPmAT5Ab3j7F9";
 String sensorName = "BME280";
@@ -99,6 +99,55 @@ void getReadings(bool a){
   delay(20);
 }
 
+void sendhttp(int timerDelay){
+    //Check WiFi connection status
+    if(WiFi.status()== WL_CONNECTED){
+      WiFiClient client;
+      HTTPClient http;
+
+      // Your Domain name with URL path or IP address with path
+      http.begin(client, serverName);
+
+      // Specify content-type header
+      http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+
+      // Prepare your HTTP POST request data
+      String httpRequestData = "api_key=" + apiKeyValue + "&sensor=" + sensorName+ "&location=" + sensorLocation + "&temp=" + String(bme.readTemperature())+ "&humi=" + String(bme.readHumidity()) + "&press=" + String(bme.readPressure()/100.0F) + "&rain=" + String(pluv) + "&wind=" + String(vel);
+      Serial.print("httpRequestData: ");
+      Serial.println(httpRequestData);
+
+      /*
+      // You can comment the httpRequestData variable above
+      // then, use the httpRequestData variable below (for testing purposes without the BME280 sensor)
+      String httpRequestData = "api_key=tPmAT5Ab3j7F9&sensor=BME280&location=Escola&temp=30.00&humi=49.54&press=1005.14&rain=0&wind=8";
+
+      // Send HTTP POST request
+      int httpResponseCode = http.POST(httpRequestData);
+      
+      //Serial.println(httpRequestData);
+
+     
+       If you need an HTTP request with a content type: text/plain
+      http.addHeader("Content-Type", "text/plain");
+      int httpResponseCode = http.POST("Hello, World!");
+
+       If you need an HTTP request with a content type: application/json, use the following:
+      http.addHeader("Content-Type", "application/json");
+      int httpResponseCode = http.POST("{\"value1\":\"19\",\"value2\":\"67\",\"value3\":\"78\"}");
+
+      */
+      int httpResponseCode = http.POST(httpRequestData);
+   
+      Serial.print("HTTP Response code: ");
+      Serial.println(httpResponseCode);
+      http.end();
+    }
+    else {
+      Serial.println("WiFi Disconnected");
+    }
+    lastTime = millis();
+}
+
 
 void setup() {
   Serial.begin(115200);
@@ -109,13 +158,6 @@ void setup() {
     Serial.println("conexao ao wifi falhou! reiniciando...");
     delay(5000);
     ESP.restart();
-  }
-
-  // (you can also pass in a Wire library object like &Wire2)
-  bool status = bme.begin(0x76);
-  if (!status) {
-    Serial.println("Could not find a valid BME280 sensor, check wiring or change I2C address!");
-    while (1);
   }
 
   /* tudo do ota
@@ -168,6 +210,14 @@ void setup() {
   Serial.println("Pronto");
   Serial.print("IP: ");
   Serial.println(WiFi.localIP());
+
+  // (you can also pass in a Wire library object like &Wire2)
+  bool status = bme.begin(0x76);
+  while(!status) {
+    bool status = bme.begin(0x76);
+    Serial.println("Could not find a valid BME280 sensor, check wiring or change I2C address!");
+    delay(1000);
+  }
 }
 
 void loop() {
@@ -179,53 +229,6 @@ void loop() {
     Serial.println("enviando");
 
     getReadings(true);
-
-    //Check WiFi connection status
-    if(WiFi.status()== WL_CONNECTED){
-      WiFiClient client;
-      HTTPClient http;
-
-      // Your Domain name with URL path or IP address with path
-      http.begin(client, serverName);
-
-      // Specify content-type header
-      http.addHeader("Content-Type", "application/x-www-form-urlencoded");
-
-      // Prepare your HTTP POST request data
-      String httpRequestData = "api_key=" + apiKeyValue + "&sensor=" + sensorName+ "&location=" + sensorLocation + "&temp=" + String(bme.readTemperature())+ "&humi=" + String(bme.readHumidity()) + "&press=" + String(bme.readPressure()/100.0F) + "&rain=" + String(pluv) + "&wind=" + String(vel);
-      Serial.print("httpRequestData: ");
-      Serial.println(httpRequestData);
-
-      /*
-      // You can comment the httpRequestData variable above
-      // then, use the httpRequestData variable below (for testing purposes without the BME280 sensor)
-      String httpRequestData = "api_key=tPmAT5Ab3j7F9&sensor=BME280&location=Escola&temp=30.00&humi=49.54&press=1005.14&rain=0&wind=8";
-
-      // Send HTTP POST request
-      int httpResponseCode = http.POST(httpRequestData);
-      
-      //Serial.println(httpRequestData);
-
-     
-       If you need an HTTP request with a content type: text/plain
-      http.addHeader("Content-Type", "text/plain");
-      int httpResponseCode = http.POST("Hello, World!");
-
-       If you need an HTTP request with a content type: application/json, use the following:
-      http.addHeader("Content-Type", "application/json");
-      int httpResponseCode = http.POST("{\"value1\":\"19\",\"value2\":\"67\",\"value3\":\"78\"}");
-
-      */
-      int httpResponseCode = http.POST(httpRequestData);
-   
-      Serial.print("HTTP Response code: ");
-      Serial.println(httpResponseCode);
-      // Free resources
-      http.end();
-    }
-    else {
-      Serial.println("WiFi Disconnected");
-    }
-    lastTime = millis();
+    sendhttp(6000);
   }
 }
