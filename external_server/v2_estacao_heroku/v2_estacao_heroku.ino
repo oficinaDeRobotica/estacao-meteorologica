@@ -45,7 +45,7 @@ unsigned long timerDelay = 60000;
 bool newInput, lastInput, pluvInputAnt, pluvInputAp = 1;
 bool a = 0;
 float raio = 0.0008;
-int countVen, countPluv, rpm, vel, pluv, previousTime;
+int volt, bat, countVen, countPluv, rpm, vel, pluv, previousTime;
 float temperature, humidity, pressure;
 
 void getReadings(bool a){
@@ -68,6 +68,9 @@ void getReadings(bool a){
   lastInput = newInput;
 
   if (a){
+    volt = analogRead(A0);
+    bat = map(volt, 365, 651, 0, 100);
+    Serial.println(bat);
     Serial.println(countVen);
     temperature = bme.readTemperature();
     humidity = bme.readHumidity();
@@ -133,7 +136,7 @@ void loop() {
       http.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
       // Prepare your HTTP POST request data
-      String httpRequestData = "api_key=" + apiKeyValue + "&sensor=" + sensorName+ "&location=" + sensorLocation + "&temp=" + String(bme.readTemperature())+ "&humi=" + String(bme.readHumidity()) + "&press=" + String(bme.readPressure()/100.0F) + "&rain=" + String(pluv) + "&wind=" + String(vel);
+      String httpRequestData = "api_key=" + apiKeyValue + "&sensor=" + sensorName+ "&location=" + sensorLocation + "&temp=" + String(bme.readTemperature())+ "&humi=" + String(bme.readHumidity()) + "&press=" + String(bme.readPressure()/100.0F) + "&rain=" + String(pluv) + "&wind=" + String(vel) + "&bat=" + String(bat);
       Serial.print("httpRequestData: ");
       Serial.println(httpRequestData);
 
