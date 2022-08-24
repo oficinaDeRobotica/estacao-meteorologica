@@ -31,8 +31,8 @@ Adafruit_BME280 bme(BME_CS, BME_MOSI, BME_MISO, BME_SCK);  // software SPI
 
 */
 
-const char* ssid = "wifi";
-const char* password = "12341234";
+const char* ssid = "Leo";
+const char* password = "leo123456";
 const char* serverName = "http://estacao-db.herokuapp.com/post-data.php";
 
 String apiKeyValue = "tPmAT5Ab3j7F9";
@@ -78,9 +78,9 @@ void getReadings(bool a){
 
     pluv = countPluv;
     //pluv = countPluv*0.254;
-    rpm = countVen/3;
-    
-    vel = 40 * 3.14 * countVen * raio;
+    //rpm = countVen/3;
+    vel = countVen;
+    //vel = 40 * 3.14 * countVen * raio;
     countVen = 0;
     countPluv = 0;
     a = false;
