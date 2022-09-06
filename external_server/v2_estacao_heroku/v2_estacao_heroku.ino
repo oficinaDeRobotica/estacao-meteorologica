@@ -1,13 +1,9 @@
-/*
-#include <SPI.h>
-#define BME_SCK 18
-#define BME_MISO 19
-#define BME_MOSI 23
-#define BME_CS 5
-*/
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
+#include <DNSServer.h>
+#include <WiFiManager.h> 
+
 #define SEALEVELPRESSURE_HPA (1013.25)
 
 #ifdef ESP32
@@ -24,17 +20,19 @@
 Adafruit_BME280 bme;  // I2C
 
 /*
- * outras opcoes
+ * outras opcoes de conexao com o esp
 
 Adafruit_BME280 bme(BME_CS);  // hardware SPI
 Adafruit_BME280 bme(BME_CS, BME_MOSI, BME_MISO, BME_SCK);  // software SPI
 
+#include <SPI.h>
+#define BME_SCK 18
+#define BME_MISO 19
+#define BME_MOSI 23
+#define BME_CS 5
 */
 
-const char* ssid = "Leo";
-const char* password = "leo123456";
 const char* serverName = "http://estacao-db.herokuapp.com/post-data.php";
-
 String apiKeyValue = "tPmAT5Ab3j7F9";
 String sensorName = "BME280";
 String sensorLocation = "LABCI";
@@ -95,17 +93,12 @@ void setup() {
   pinMode(buttonPin, INPUT_PULLUP);
   pinMode(inPluv, INPUT_PULLUP);
 
-  WiFi.begin(ssid, password);
-  Serial.println("Conectando");
-  while(WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-
-  // (you can also pass in a Wire library object like &Wire2)
+  WiFiManager wifiManager;
+  wifiManager.autoConnect("configurarEsp");
+  
   bool status = bme.begin(0x76);
   if (!status) {
-    Serial.println("Could not find a valid BME280 sensor, check wiring or change I2C address!");
+    Serial.println("o bme nao foi achado");
     while (1);
   }
   
@@ -141,24 +134,14 @@ void loop() {
       Serial.println(httpRequestData);
 
       /*
-      // You can comment the httpRequestData variable above
-      // then, use the httpRequestData variable below (for testing purposes without the BME280 sensor)
-      String httpRequestData = "api_key=tPmAT5Ab3j7F9&sensor=BME280&location=Escola&temp=30.00&humi=49.54&press=1005.14&rain=0&wind=8";
-
-      // Send HTTP POST request
-      int httpResponseCode = http.POST(httpRequestData);
-      
-      //Serial.println(httpRequestData);
-
-     
-       If you need an HTTP request with a content type: text/plain
+       * 
+       * outros tipos de header, como texto ou json para outros servidores/apps
+       * 
       http.addHeader("Content-Type", "text/plain");
       int httpResponseCode = http.POST("Hello, World!");
-
-       If you need an HTTP request with a content type: application/json, use the following:
+       
       http.addHeader("Content-Type", "application/json");
       int httpResponseCode = http.POST("{\"value1\":\"19\",\"value2\":\"67\",\"value3\":\"78\"}");
-
       */
       int httpResponseCode = http.POST(httpRequestData);
       if (httpResponseCode>0) {
@@ -169,11 +152,10 @@ void loop() {
         Serial.print("Error code: ");
         Serial.println(httpResponseCode);
       }
-      // Free resources
       http.end();
     }
     else {
-      Serial.println("WiFi Disconnected");
+      Serial.println("WiFi desconectado");
     }
     lastTime = millis();
   }
