@@ -67,7 +67,12 @@ void getReadings(bool a){
 
   if (a){
     volt = analogRead(A0);
-    bat = map(volt, 365, 651, 0, 100);
+    //tensao da bateria +- entre 3.3 e 4.2(nao está calibrado, requer testes)
+    bat = map(volt, 420, 650, 0, 100);
+    //esp "desliga" se tensao da bateria estiver muito baixa
+    if(bat <= 0){
+      ESP.deepSleep(0);
+    }
     Serial.println(bat);
     Serial.println(countVen);
     temperature = bme.readTemperature();
